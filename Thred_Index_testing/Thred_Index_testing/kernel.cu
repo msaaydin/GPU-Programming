@@ -14,8 +14,7 @@ __global__ void thread_index_test(int *a) {
 		a[id] = threadIdx.x;
 	}
 }
-// jnjnj
-//kfmjgkfkfgjkk
+
 
 int main(void) {
 	int A[N][N] = { { 1,2 },{ 3,4 } };
