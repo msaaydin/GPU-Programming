@@ -1,21 +1,18 @@
 /*
-* Copyright 1993-2010 NVIDIA Corporation.  All rights reserved.
-*
-* NVIDIA Corporation and its licensors retain all intellectual property and
-* proprietary rights in and to this software and related documentation.
-* Any use, reproduction, disclosure, or distribution of this software
-* and related documentation without an express license agreement from
-* NVIDIA Corporation is strictly prohibited.
-*
-* Please refer to the applicable NVIDIA end user license agreement (EULA)
-* associated with this source code for terms and conditions that govern
-* your use of this NVIDIA software.
-*
+  Musa AYDIN, Fatih Sultan Mehmet Vakif University,
+  Istanbul, Turkey
+  maydin@fsm.edu.tr
+  this program, calculates scaler dot products,
+  using threads synchronization,
+  first implementation in kernel each thread own private variable
+  second each thread share data using shared memory structure
 */
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include "cuda.h"
 #include <stdio.h>
+
+
 //#include "../common/book.h"
 
 #define imin(a,b) (a<b?a:b)
@@ -40,6 +37,7 @@ __global__ void dot(float *a, float *b, float *c) {
 	// set the cache values
 	cache[cacheIndex] = temp;
 	// synchronize threads in this block
+
 	__syncthreads();
 
 	// for reductions, threadsPerBlock must be a power of 2
