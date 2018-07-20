@@ -5,7 +5,7 @@
   this program, calculates scaler dot products,
   using threads synchronization,
   first implementation in kernel each thread own private variable
-  second each thread share data using shared memory structure
+  second, each thread share data using shared memory structure
 */
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
