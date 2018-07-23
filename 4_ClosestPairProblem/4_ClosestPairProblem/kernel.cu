@@ -1,7 +1,6 @@
 
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-
 #include <stdio.h>
 #include <conio.h>
 #include<ctime>
@@ -31,10 +30,11 @@ __global__ void FindClosestGPU(float3d* points, int* indices, int count) {
 }
 int main()
 {
+
 	int iteration = 1;
 	int blockdim = 32; // threadsize, thread number
 	// number of points
-	const int count = 1000000;
+	const int count = 100000;
 	int *indexOfClosest = new int[count];
 	float3d *points = new float3d[count];
 	float3d* d_points;
@@ -47,7 +47,7 @@ int main()
 
 	}
 	long fatstest = 1000000;
-	// alogirtmayý 20 defa çalýþtýr
+	// alogirtmayý 10 defa çalýþtýr
 	cout << "CPU calisma sonucu " << endl;
 
 	for (int i = 0; i < iteration; i++)

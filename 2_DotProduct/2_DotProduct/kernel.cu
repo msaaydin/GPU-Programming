@@ -11,65 +11,83 @@
 #include "device_launch_parameters.h"
 #include "cuda.h"
 #include <stdio.h>
+#define N (2048 * 2048)
+#define THREADS_PER_BLOCK 512
 
-
-
-
-
-
-
-
-int main(void) {
-	float   *a, *b, c, *partial_c;
-	float   *dev_a, *dev_b, *dev_partial_c;
-
-	// allocate memory on the cpu side
-	a = (float*)malloc(N*sizeof(float));
-	b = (float*)malloc(N*sizeof(float));
-	partial_c = (float*)malloc(blocksPerGrid*sizeof(float));
-
-	// allocate the memory on the GPU
-	cudaMalloc((void**)&dev_a, N*sizeof(float));
-	cudaMalloc((void**)&dev_b, N*sizeof(float));
-	cudaMalloc((void**)&dev_partial_c, blocksPerGrid*sizeof(float));
-
-	// fill in the host memory with data
-	for (int i = 0; i < N; i++) {
-		a[i] = i;
-		b[i] = i * 2;
+void init_matrix(int *a, int len) {
+	int i;
+	
+	for ( i = 0; i < len; i++)
+	{
+		a[i] = i + 1;
 	}
-
-	// copy the arrays 'a' and 'b' to the GPU
-	cudaMemcpy(dev_a, a, N*sizeof(float),
-		cudaMemcpyHostToDevice);
-	cudaMemcpy(dev_b, b, N*sizeof(float),
-		cudaMemcpyHostToDevice);
-
-	dot << <blocksPerGrid, threadsPerBlock >> >(dev_a, dev_b,
-		dev_partial_c);
-
-	// copy the array 'c' back from the GPU to the CPU
-	cudaMemcpy(partial_c, dev_partial_c,
-		blocksPerGrid*sizeof(float),
-		cudaMemcpyDeviceToHost);
-
-	// finish up on the CPU side
-	c = 0;
-	for (int i = 0; i < blocksPerGrid; i++) {
-		c += partial_c[i];
+}
+void print_array(int *a, int len) {
+	int i;
+	if (len > 16) {
+		len = 16;
 	}
+	for (i = 0; i < len; i++)
+	{
+		printf("%d\n", a[i]);
+	}
+}
 
-#define sum_squares(x)  (x*(x+1)*(2*x+1)/6)
-	printf("Does GPU value %.6g = %.6g?\n", c,
-		2 * sum_squares((float)(N - 1)));
+__global__ void dotSharedMem(int *a, int *b, int *c) {
+	// temp deðiþkeni her bir thread için private olan deðiþkendir,
+	// her bir thread in kendi temp deðiþkeni vardýr.
+	__shared__ int temp[THREADS_PER_BLOCK];
+	int id = threadIdx.x + blockIdx.x * blockDim.x;
+	 //temp[threadIdx.x] = a[threadIdx.x] * b[threadIdx.x];
+	 temp[id] = a[id] * b[id];	
+	
+	 __syncthreads();
+	 if (0 == threadIdx.x) {
+		 int sum = 0;
+		 for (int i = 0; i < THREADS_PER_BLOCK; i++)
+			 sum += temp[i];
+		 atomicAdd(c, sum);
+		// atomicAdd(&c[0], sum);
+		 //*c = sum;
+	 }
 
-	// free memory on the gpu side
+}
+int main(void) {	
+
+	int *a, *b, *c; // copies of a, b, c
+	int *dev_a, *dev_b, *dev_c; // devices copies of a, b, c
+	int size = N * sizeof(int); // allocate device copies of a, b, c
+
+	cudaMalloc((void**)&dev_a, size);
+	cudaMalloc((void**)&dev_b, size);
+	cudaMalloc((void**)&dev_c, sizeof(int));
+	a = (int *)malloc(size);
+	b = (int *)malloc(size);
+	c = (int *)malloc(sizeof(int));
+	//*c = 0;
+
+	init_matrix(a, N);
+	print_array(a, N);
+	init_matrix(b, N);
+	
+	// copy inputs to device
+	cudaMemcpy(dev_a, a, size, cudaMemcpyHostToDevice);
+	cudaMemcpy(dev_b, b, size, cudaMemcpyHostToDevice);
+	dotSharedMem <<< N / THREADS_PER_BLOCK, THREADS_PER_BLOCK >> >(dev_a, dev_b, dev_c);
+
+	// copy device result back to host copy of c
+	cudaMemcpy(c, dev_c, sizeof(int), cudaMemcpyDeviceToHost);
+
+	printf("dot product result = %d\n", c[0]);
+	//printf("%d\n", c);
+	//print_array(c, N);
+
+	free(a); free(b); free(c);
 	cudaFree(dev_a);
 	cudaFree(dev_b);
-	cudaFree(dev_partial_c);
+	cudaFree(dev_c);
 
-	// free memory on the cpu side
-	free(a);
-	free(b);
-	free(partial_c);
+	return 0;
 }
+
+
