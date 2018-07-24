@@ -30,8 +30,8 @@ int main(void) {
 
 	// fill the arrays 'a' and 'b' on the CPU
 	for (int i = 0; i<N; i++) {
-		a[i] = i;
-		b[i] = 2 * i;
+		a[i] = i+1;
+		b[i] = 2 * i+1;
 	}
 
 	// copy the arrays 'a' and 'b' to the GPU
@@ -39,8 +39,7 @@ int main(void) {
 		cudaMemcpyHostToDevice));
 	HANDLE_ERROR(cudaMemcpy(dev_b, b, N * sizeof(int),
 		cudaMemcpyHostToDevice));
-
-	add << <(N+128-1)/128, 128 >> >(dev_a, dev_b, dev_c);
+	add << <(N + 128-1) / 128, 128 >> >(dev_a, dev_b, dev_c);
 	//add << <128, 128 >> >(dev_a, dev_b, dev_c);
 
 
@@ -49,10 +48,13 @@ int main(void) {
 		cudaMemcpyDeviceToHost));
 
 	// verify that the GPU did the work we requested
-	bool success = true;
+	int temp;
 	for (int i = 0; i<N; i+=150) {
-		
-			printf("  %d + %d = %d\n", a[i], b[i], c[i]);
+		if (c[i] == 0) {
+			temp = i;
+			break;
+		}
+		printf("  %d + %d = %d\n", a[i], b[i], c[i]);
 		
 	}
 
