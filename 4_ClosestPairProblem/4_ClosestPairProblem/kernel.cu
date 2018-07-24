@@ -32,9 +32,9 @@ int main()
 {
 
 	int iteration = 1;
-	int blockdim = 32; // threadsize, thread number
+	int blockdim = 128; // threadsize, thread number
 	// number of points
-	const int count = 100000;
+	const int count = 10000;
 	int *indexOfClosest = new int[count];
 	float3d *points = new float3d[count];
 	float3d* d_points;
@@ -50,14 +50,14 @@ int main()
 	// alogirtmayý 10 defa çalýþtýr
 	cout << "CPU calisma sonucu " << endl;
 
-	for (int i = 0; i < iteration; i++)
+	/*for (int i = 0; i < iteration; i++)
 	{
 		long starttime = clock();
 
 		FindClosestCPU(points, indexOfClosest, count);
 		long finishtime = clock();
 		cout << i + 1 << ". calisma sonucu gecen sure = " << (finishtime - starttime) << "  ms" << endl;
-	}
+	}*/
 	cout << "CPU bulunan index sonuc=" << endl;
 	for (int i = 0; i < iteration; i++)
 	{

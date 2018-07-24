@@ -11,8 +11,8 @@
 #include "device_launch_parameters.h"
 #include "cuda.h"
 #include <stdio.h>
-#define N (2048 * 2048)
-#define THREADS_PER_BLOCK 512
+#define N (10)
+#define THREADS_PER_BLOCK 10
 
 void init_matrix(int *a, int len) {
 	int i;
@@ -73,7 +73,7 @@ int main(void) {
 	// copy inputs to device
 	cudaMemcpy(dev_a, a, size, cudaMemcpyHostToDevice);
 	cudaMemcpy(dev_b, b, size, cudaMemcpyHostToDevice);
-	dotSharedMem <<< N / THREADS_PER_BLOCK, THREADS_PER_BLOCK >> >(dev_a, dev_b, dev_c);
+	dotSharedMem << < N / THREADS_PER_BLOCK, THREADS_PER_BLOCK >> >(dev_a, dev_b, dev_c);
 
 	// copy device result back to host copy of c
 	cudaMemcpy(c, dev_c, sizeof(int), cudaMemcpyDeviceToHost);

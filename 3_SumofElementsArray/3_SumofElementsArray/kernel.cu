@@ -18,14 +18,7 @@ void print_array(int *array, int size)
 	printf("}\n");
 }
 
-__global__ void increment_naive(int *g)
-{
 
-	int i = blockIdx.x * blockDim.x + threadIdx.x;
-	
-	i = i % ARRAY_SIZE;
-	g[i] = g[i] + 1;
-}
 
 __global__ void increment_atomic(int *g)
 {
@@ -48,15 +41,11 @@ int main(int argc, char **argv)
 	int h_array[ARRAY_SIZE];
 	const int ARRAY_BYTES = ARRAY_SIZE * sizeof(int);
 
-
 	int * d_array;
 	cudaMalloc((void **)&d_array, ARRAY_BYTES);
 	cudaMemset((void *)d_array, 0, ARRAY_BYTES);
 
-	// launch the kernel - comment out one of these
-	timer.Start();
-   // increment_naive<<<NUM_THREADS/BLOCK_WIDTH, BLOCK_WIDTH>>>(d_array);
-	
+	timer.Start();	
 
 	//printf("***************atomic adds result..*************\n");
 	//cudaDeviceSynchronize();
