@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "book.h"
 
-#define N   (2048 * 2048)
+#define N   (4096 * 4096)
 
 __global__ void add(int *a, int *b, int *c) {
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
