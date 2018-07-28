@@ -3,10 +3,10 @@
 #include "device_launch_parameters.h"
 #include "cuda.h" 
 #include <stdio.h>
-#define n 4
-#define m 4
+#define n 1000
+#define m 1000
 #include <math.h>
-#define TILE_WIDTH 2 // blockDim ile ayný bu yani thread size 
+#define TILE_WIDTH 16 // blockDim ile ayný bu yani thread size 
 
 //for addition
 __global__  void kernel_matrix_addition(int *array1, int *array2, int *result, int WIDTH1)
@@ -73,6 +73,8 @@ long sumMATrix(int *C, int len) {
 	return sum;
 }
 void printMatrix(int *C, int len) {
+	if (len > 8)
+		len = 8;
 	printf("*************print matrix***************\n ");
 	for (int i = 0; i < len*len; i++)
 	{
@@ -85,7 +87,7 @@ void printMatrix(int *C, int len) {
 
 int main()
 {
-	int _threadsSize = 2;
+	int _threadsSize = 16;
 
 	int *A, *B, *C, *dev_A, *dev_B, *result_d;
 	A = (int*)malloc(n*m*sizeof(int));
@@ -100,8 +102,8 @@ int main()
 
 	long sum = 0;
 	for (int i = 0; i < n*m; i++) {
-		A[i] = rand()%10;
-		B[i] = rand()%10;
+		A[i] = 1;//rand()%10;
+		B[i] = 1;//rand()%10;
 		sum += A[i];
 	}
 	printMatrix(A, m);
